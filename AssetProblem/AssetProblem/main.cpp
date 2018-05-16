@@ -16,6 +16,7 @@ const int ITEMS[GENE_SIZE] = {
 };
 
 int chromosome[POP_SIZE][GENE_SIZE];
+double fitness[POP_SIZE];
 
 void printChromosome() {
     for (int i=0; i<POP_SIZE; i++) {
@@ -35,13 +36,30 @@ void initializeChromosome() {
     }
 }
 
+// goal 1 - maximize number of items (number of 1s in the gene pool)
+// goal 2 - total price should be as closed as budget
 void evaluateChromosome() {
-    
+    for (int i = 0; i < POP_SIZE; i++) {
+        int accPrice = 0, nItems = 0, totalPriority = 0;
+        for (int j = 0; j < GENE_SIZE; j++) {
+            if (chromosome[i][j] == 1) {
+                nItems++;
+                accPrice += ITEMS[j];
+                totalPriority += (GENE_SIZE - j);
+            }
+        }
+
+        fitness[i] = 1.0 / (abs(BUDGET - accPrice) + nItems + totalPriority);
+
+        cout << "Price: RM " << accPrice << " Fitness: " << fitness[i] << endl;
+    }
+    cout << endl;
 }
 
 int main(int argc, const char * argv[]) {
     srand ( unsigned ( time(0) ) ); // enable randomness in our program
     initializeChromosome();
-    printChromosome();
+    // printChromosome();
+    evaluateChromosome();
     return 0;
 }
