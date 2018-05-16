@@ -1,4 +1,5 @@
 #include <ctime>
+#include <math.h>
 #include <cstdlib>
 #include <iostream>
 using namespace std;
@@ -6,6 +7,8 @@ using namespace std;
 #define POP_SIZE 5
 #define GENE_SIZE 20
 #define BUDGET 40000
+#define MAX_PRICE 63550
+#define MIN_PRICE 0
 
 //constants
 const int ITEMS[GENE_SIZE] = {
@@ -17,6 +20,12 @@ const int ITEMS[GENE_SIZE] = {
 
 int chromosome[POP_SIZE][GENE_SIZE];
 double fitness[POP_SIZE];
+
+// normalize both budget and accumulated price to get a rational fitness value
+double normalizePrice(int x) {
+    double normalizedValue = double(x - MIN_PRICE) / (MAX_PRICE - MIN_PRICE);
+    return normalizedValue;
+}
 
 void printChromosome() {
     for (int i=0; i<POP_SIZE; i++) {
@@ -38,9 +47,12 @@ void initializeChromosome() {
 
 // goal 1 - maximize number of items (number of 1s in the gene pool)
 // goal 2 - total price should be as closed as budget
+// goal 3 - prioritize certain items
 void evaluateChromosome() {
     for (int i = 0; i < POP_SIZE; i++) {
         int accPrice = 0, nItems = 0, totalPriority = 0;
+        double  f1 = 0.0;
+        
         for (int j = 0; j < GENE_SIZE; j++) {
             if (chromosome[i][j] == 1) {
                 nItems++;
@@ -48,10 +60,12 @@ void evaluateChromosome() {
                 totalPriority += (GENE_SIZE - j);
             }
         }
+        
+        f1 = 1.0 / fabs(normalizePrice(BUDGET) - normalizePrice(accPrice)) / 100;
 
-        fitness[i] = 1.0 / (abs(BUDGET - accPrice) + nItems + totalPriority);
+        fitness[i] = f1;
 
-        cout << "Price: RM " << accPrice << " Fitness: " << fitness[i] << endl;
+        cout << "Price: RM " << accPrice << " Fitness: " << f1 << endl;
     }
     cout << endl;
 }
@@ -59,7 +73,6 @@ void evaluateChromosome() {
 int main(int argc, const char * argv[]) {
     srand ( unsigned ( time(0) ) ); // enable randomness in our program
     initializeChromosome();
-    // printChromosome();
     evaluateChromosome();
     return 0;
 }
