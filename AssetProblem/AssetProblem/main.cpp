@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-#define POP_SIZE 5
+#define POP_SIZE 10
 #define GENE_SIZE 20
 #define BUDGET 40000
 #define MAX_PRICE 63550
@@ -48,10 +48,11 @@ void initializeChromosome() {
 // goal 1 - maximize number of items (number of 1s in the gene pool)
 // goal 2 - total price should be as closed as budget
 // goal 3 - prioritize certain items
+// currently goals are not associated with weight (importance), review later
 void evaluateChromosome() {
     for (int i = 0; i < POP_SIZE; i++) {
-        int accPrice = 0, nItems = 0, totalPriority = 0;
-        double  f1 = 0.0;
+        int accPrice = 0;
+        double  f1 = 0.0, f2 = 0.0, f3 = 0.0, nItems = 0.0, totalPriority = 0;
         
         for (int j = 0; j < GENE_SIZE; j++) {
             if (chromosome[i][j] == 1) {
@@ -61,11 +62,13 @@ void evaluateChromosome() {
             }
         }
         
-        f1 = 1.0 / fabs(normalizePrice(BUDGET) - normalizePrice(accPrice)) / 100;
+        f1 = 1.0 / (fabs(normalizePrice(BUDGET) - normalizePrice(accPrice)) + 1);
+        f2 = nItems / GENE_SIZE;
+        f3 = totalPriority / (GENE_SIZE * (GENE_SIZE+1) / 2);
 
-        fitness[i] = f1;
-
-        cout << "Price: RM " << accPrice << " Fitness: " << f1 << endl;
+        fitness[i] = (f1 + f2 + f3) / 3;
+        
+        cout << "Price: RM " << accPrice << "\tItems: " << nItems << " \tPriority: " << totalPriority <<  " \tFitness: " << fitness[i] << endl;
     }
     cout << endl;
 }
