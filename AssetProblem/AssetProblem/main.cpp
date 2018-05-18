@@ -11,6 +11,7 @@ using namespace std;
 #define MAX_PRICE 63550
 #define MIN_PRICE 0
 #define CROSSOVER_PROB 1.0
+#define MUTATION_PROB 1.0
 
 //constants
 const int ITEMS[GENE_SIZE] = {
@@ -154,11 +155,33 @@ void crossover() {
     cout << "********************\t Crossover Parent End \t********************\n\n\n";
 }
 
+void mutation() {
+    cout << "********************\t 1-Point Mutation Begin \t********************\n";
+    
+    for (int i=0; i<PARENT_SIZE; i++) {
+        double mProb = double( ( rand() % 11 ) ) / 10.0;
+//        cout << "Mutation Probability : " << mProb << endl;
+        
+        if (mProb < MUTATION_PROB) {
+            int mPoint = rand() % GENE_SIZE;
+            cout << "Children " << i+1 << " : Mutation did happen at point " << mPoint+1 << " with probability of " << mProb << endl;
+            
+            children[i][mPoint] = 1 - children[i][mPoint];
+        } else {
+            cout << "Children " << i+1 << "Mutation did not happen" << endl;
+        }
+    }
+    
+    printChildren();
+    cout << "********************\t 1-Point Mutation End \t********************\n\n\n";
+}
+
 int main(int argc, const char * argv[]) {
     srand ( unsigned ( time(0) ) ); // enable randomness in our program
     initializeChromosome();
     evaluateChromosome();
     parentSelection();
     crossover();
+    mutation();
     return 0;
 }
