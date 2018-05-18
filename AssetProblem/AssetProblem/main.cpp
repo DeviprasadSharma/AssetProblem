@@ -6,6 +6,7 @@ using namespace std;
 
 #define POP_SIZE 10
 #define GENE_SIZE 20
+#define PARENT_SIZE 2
 #define BUDGET 40000
 #define MAX_PRICE 63550
 #define MIN_PRICE 0
@@ -20,6 +21,8 @@ const int ITEMS[GENE_SIZE] = {
 
 int chromosome[POP_SIZE][GENE_SIZE];
 double fitness[POP_SIZE];
+int parent[2][GENE_SIZE];
+int children[2][GENE_SIZE];
 
 // normalize both budget and accumulated price to get a rational fitness value
 double normalizePrice(int x) {
@@ -73,9 +76,59 @@ void evaluateChromosome() {
     cout << endl;
 }
 
+void parentSelection() {
+    int player1, player2;
+    for (int i=0; i<PARENT_SIZE; i++) {
+        
+        //randomly choose chromosome[0-19]
+        player1 = rand() % POP_SIZE;
+        player2 = rand() % POP_SIZE;
+        
+        // make sure both player are different
+        while (player1 == player2) {
+            player1 = rand() % POP_SIZE;
+            player2 = rand() % POP_SIZE;
+        }
+        
+        cout << "\nPARENT " << i + 1 << " :\n";
+        cout << "\tPlayer 1 : Chromo[" << player1 + 1 << "]\tFitness : " << fitness[player1] << " \n";
+        cout << "\tPlayer 2 : Chromo[" << player2 + 1 << "]\tFitness : " << fitness[player2] << " \n";
+        
+        //compare fitness for both player
+        cout << "____________________________";
+        if (fitness[player1] < fitness[player2]) {
+            cout << "\nWinning player   : Chromo[" << player2 + 1 << "]\n";
+            for (int j=0; j<POP_SIZE; j++) {
+                for (int k=0; k<GENE_SIZE; k++) {
+                    parent[i][k] = chromosome[player2][k];
+                }
+            }
+        } else {
+            cout << "\nWinning player : Chromo[" << player1 + 1 << "]\n";
+            for (int j=0; j<POP_SIZE; j++) {
+                for (int k=0; k<GENE_SIZE; k++) {
+                    parent[i][k] = chromosome[player1][k];
+                }
+            }
+        }
+    }
+    
+    // print parent chromosome
+    cout << endl;
+    for (int i = 0; i < 2; i++) {
+        cout << "\nParent " << i + 1 << " : ";
+        for (int j = 0; j < GENE_SIZE; j++) {
+            cout << parent[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
 int main(int argc, const char * argv[]) {
     srand ( unsigned ( time(0) ) ); // enable randomness in our program
     initializeChromosome();
     evaluateChromosome();
+    parentSelection();
     return 0;
 }
