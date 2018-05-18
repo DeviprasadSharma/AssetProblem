@@ -21,8 +21,8 @@ const int ITEMS[GENE_SIZE] = {
 
 int chromosome[POP_SIZE][GENE_SIZE];
 double fitness[POP_SIZE];
-int parent[2][GENE_SIZE];
-int children[2][GENE_SIZE];
+int parent[PARENT_SIZE][GENE_SIZE];
+int children[PARENT_SIZE][GENE_SIZE];
 
 // normalize both budget and accumulated price to get a rational fitness value
 double normalizePrice(int x) {
