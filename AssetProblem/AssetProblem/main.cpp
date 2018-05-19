@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-#define MAX_GENERATION 20
+#define MAX_GENERATION 4
 #define POP_SIZE 10
 #define GENE_SIZE 20
 #define PARENT_SIZE 2
@@ -30,7 +30,7 @@ double fitness[POP_SIZE];
 int parent[PARENT_SIZE][GENE_SIZE];
 int children[PARENT_SIZE][GENE_SIZE];
 
-int bestParent, bestChildren;
+int bestParent, bestPlayer, bestChildren;
 
 // normalize both budget and accumulated price to get a rational fitness value
 double normalizePrice(int x) {
@@ -79,7 +79,6 @@ void initializeChromosome() {
 // goal 3 - prioritize certain items
 // currently goals are not associated with weight (importance), review later
 void evaluateChromosome() {
-    cout << "********************\t Evaluate Chromosome Begin \t********************\n";
     for (int i = 0; i < POP_SIZE; i++) {
         int accPrice = 0;
         double  f1 = 0.0, f2 = 0.0, f3 = 0.0, nItems = 0.0, totalPriority = 0;
@@ -98,14 +97,17 @@ void evaluateChromosome() {
 
         fitness[i] = (f1 + f2 + f3) / 3;
         
-        cout << "Chromo " << i+1 << "\tPrice: RM " << accPrice << " \tItems: " << nItems << " \tPriority: " << totalPriority <<  " \tFitness: " << fitness[i] << endl;
+        cout << "Chromo " << i+1
+             << "\tPrice: RM "
+             << accPrice << " \tItems: "
+             << nItems << " \tPriority: "
+             << totalPriority <<  " \tFitness: "
+             << fitness[i] << endl;
     }
-    cout << "********************\t Evaluate Chromosome End \t********************\n\n\n";
 }
 
 void parentSelection() {
-//    cout << "********************\t Parent Selection Begin \t********************";
-    int player1, player2, bestPlayer;
+    int player1, player2;
     for (int i=0; i<PARENT_SIZE; i++) {
         
         //randomly choose chromosome[0-19]
@@ -118,9 +120,13 @@ void parentSelection() {
             player2 = rand() % POP_SIZE;
         }
         
-//        cout << "\nParent   " << i + 1 << " :\n";
-//        cout << "\tPlayer 1 : Chromo[" << player1 + 1 << "]\tFitness : " << fitness[player1] << " \n";
-//        cout << "\tPlayer 2 : Chromo[" << player2 + 1 << "]\tFitness : " << fitness[player2] << " \n";
+        // make sure second player is not selected as bestPlayer in the previous iteration
+        if (i == 1) {
+            while (player1 == bestPlayer || player2 == bestPlayer) {
+                player1 = rand() % POP_SIZE;
+                player2 = rand() % POP_SIZE;
+            }
+        }
         
         // find out who is the best player by comparing fitness
         if (fitness[player1] > fitness[player2]) {
@@ -130,62 +136,41 @@ void parentSelection() {
             bestPlayer = player2;
             bestParent = 1;
         }
-//        cout << "\n\tWinning player ---> Chromo[" << bestPlayer + 1 << "]\n";
+        
+        
+        cout << "\tWinning player ---> Chromo[" << bestPlayer + 1 << "]\n";
         
         // allocate gene of best player to the parent array
         for (int j=0; j<POP_SIZE; j++) {
             for (int k=0; k<GENE_SIZE; k++) parent[i][k] = chromosome[bestPlayer][k];
         }
     }
-    
-//    cout << endl;
-//    printParent();
-//    cout << "********************\t Parent Selection End \t********************\n\n\n";
 }
 
 void crossover() {
-//    cout << "********************\t Crossover Parent Begin \t********************\n";
-    
     double cProb = ( rand() % 11 ) / 10.0;
-//    cout << "Crossover Probability : " << cProb << endl;
     
     copyParent();
     
     if (cProb < CROSSOVER_PROB) {
         int cPoint = rand() % GENE_SIZE;
-//        cout << "Crossover did happen at point " << cPoint+1 << endl;
         
         for (int i=cPoint+1; i<GENE_SIZE; i++) {
             children[0][i] = parent[1][i];
             children[1][i] = parent[0][i];
         }
-    } else {
-//        cout << "Crossover did not happen" << endl;
     }
-    
-//    printChildren();
-//    cout << "********************\t Crossover Parent End \t********************\n\n\n";
 }
 
 void mutation() {
-//    cout << "********************\t 1-Point Mutation Begin \t********************\n";
-    
     for (int i=0; i<PARENT_SIZE; i++) {
         double mProb = double( ( rand() % 11 ) ) / 10.0;
         
         if (mProb < MUTATION_PROB) {
             int mPoint = rand() % GENE_SIZE;
-//            cout << "Children " << i+1 << " : Mutation did happen at point " << mPoint+1 <<
-//            " with probability of " << mProb << endl;
-            
             children[i][mPoint] = 1 - children[i][mPoint];
-        } else {
-//            cout << "Children " << i+1 << " : Mutation did not happen" << endl;
         }
     }
-    
-//    printChildren();
-//    cout << "********************\t 1-Point Mutation End \t********************\n\n\n";
 }
 
 // determine which children is better, return position index
@@ -240,7 +225,7 @@ int main(int argc, const char * argv[]) {
     initializeChromosome();
     
     for (int i=0; i<MAX_GENERATION; i++) {
-        cout << "\n============================== Generation " << i+1 << " ==============================\n";
+        cout << "\n=============================== Generation " << i+1 << " ===============================\n";
         evaluateChromosome();
         
         for (int j=0; j<POP_SIZE/2; j++) {
