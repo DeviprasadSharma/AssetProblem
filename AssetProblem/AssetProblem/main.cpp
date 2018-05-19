@@ -1,11 +1,12 @@
 #include <ctime>
 #include <math.h>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 using namespace std;
 
-#define MAX_GENERATION 4
-#define POP_SIZE 10
+#define MAX_GENERATION 50
+#define POP_SIZE 100
 #define GENE_SIZE 20
 #define PARENT_SIZE 2
 #define BUDGET 40000
@@ -31,6 +32,10 @@ int parent[PARENT_SIZE][GENE_SIZE];
 int children[PARENT_SIZE][GENE_SIZE];
 
 int bestParent, bestPlayer, bestChildren;
+int bestChromo[GENE_SIZE];
+double bestFitness = 0.0, averageFitness = 0.0;
+ofstream bestFitness_file("bestFitness.csv"), bestSolution_file("bestSolution.txt"), avgFitness_file("avgFitness.csv");
+
 
 // normalize both budget and accumulated price to get a rational fitness value
 double normalizePrice(int x) {
@@ -137,9 +142,6 @@ void parentSelection() {
             bestParent = 1;
         }
         
-        
-        cout << "\tWinning player ---> Chromo[" << bestPlayer + 1 << "]\n";
-        
         // allocate gene of best player to the parent array
         for (int j=0; j<POP_SIZE; j++) {
             for (int k=0; k<GENE_SIZE; k++) parent[i][k] = chromosome[bestPlayer][k];
@@ -220,6 +222,27 @@ void replaceGen() {
     }
 }
 
+void calculateAverageFitness() {
+    double totalFitness = 0;
+    for (int i = 0; i < POP_SIZE; i++) totalFitness += fitness[i];
+    
+    averageFitness = totalFitness / POP_SIZE;
+    avgFitness_file << averageFitness << endl;
+}
+
+void recordBestFitness() {
+    for (int i= 0; i<POP_SIZE; i++) {
+        if (fitness[i] > bestFitness) {
+            bestFitness = fitness[i];
+            for (int j = 0; j < GENE_SIZE; j++) bestChromo[j] = chromosome[i][j];
+        }
+    }
+    
+    bestFitness_file << bestFitness << endl;
+    for (int k = 0; k < GENE_SIZE; k++) bestSolution_file << bestChromo[k];
+    bestSolution_file <<endl;
+}
+
 int main(int argc, const char * argv[]) {
     srand ( unsigned ( time(0) ) ); // enable randomness in our program
     initializeChromosome();
@@ -227,6 +250,8 @@ int main(int argc, const char * argv[]) {
     for (int i=0; i<MAX_GENERATION; i++) {
         cout << "\n=============================== Generation " << i+1 << " ===============================\n";
         evaluateChromosome();
+        calculateAverageFitness();
+        recordBestFitness();
         
         for (int j=0; j<POP_SIZE/2; j++) {
             parentSelection();
@@ -238,5 +263,8 @@ int main(int argc, const char * argv[]) {
         replaceGen();
     }
     
+    bestFitness_file.close();
+    bestSolution_file.close();
+    avgFitness_file.close();
     return 0;
 }
