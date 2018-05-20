@@ -79,6 +79,11 @@ void initializeChromosome() {
     }
 }
 
+double computeTotalFitness(double f1, double f2, double f3) {
+//    return (f1 + f2 + f3) / 3;
+    return 0.65*f1 + 0.1*f2 + 0.25*f3;
+}
+
 // goal 1 - total price should be as closed as budget
 // goal 2 - maximize number of items (number of 1s in the gene pool)
 // goal 3 - prioritize certain items
@@ -100,7 +105,7 @@ void evaluateChromosome() {
         f2 = nItems / GENE_SIZE;
         f3 = totalPriority / (GENE_SIZE * (GENE_SIZE+1) / 2);
 
-        fitness[i] = (f1 + f2 + f3) / 3;
+        fitness[i] = computeTotalFitness(f1, f2, f3);
         
         cout << "Chromo " << i+1
              << "\tPrice: RM "
@@ -196,7 +201,7 @@ int competeChildren() {
         f2 = nItems / GENE_SIZE;
         f3 = totalPriority / (GENE_SIZE * (GENE_SIZE+1) / 2);
         
-        fitnessChildren[i] = (f1 + f2 + f3) / 3;
+        fitness[i] = computeTotalFitness(f1, f2, f3);
     }
     
     if (fitnessChildren[0] > fitnessChildren[1]) return 0; else return 1;
