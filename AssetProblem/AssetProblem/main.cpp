@@ -5,15 +5,15 @@
 #include <iostream>
 using namespace std;
 
-#define MAX_GENERATION 50
-#define POP_SIZE 100
+#define MAX_GENERATION 100
+#define POP_SIZE 50
 #define GENE_SIZE 20
 #define PARENT_SIZE 2
 #define BUDGET 40000
 #define MAX_PRICE 63550
 #define MIN_PRICE 0
 #define CROSSOVER_PROB 1.0
-#define MUTATION_PROB 1.0
+#define MUTATION_PROB 0.9
 
 //constants
 const int ITEMS[GENE_SIZE] = {
@@ -34,7 +34,7 @@ int children[PARENT_SIZE][GENE_SIZE];
 int bestParent, bestPlayer, bestChildren;
 int bestChromo[GENE_SIZE];
 double bestFitness = 0.0, averageFitness = 0.0;
-ofstream bestFitness_file("bestFitness.csv"), bestSolution_file("bestSolution.txt"), avgFitness_file("avgFitness.csv");
+ofstream bestFitness_file("bestFitness.csv", ios::app), bestSolution_file("bestSolution.txt", ios::app), avgFitness_file("avgFitness.csv", ios::app);
 
 
 // normalize both budget and accumulated price to get a rational fitness value
